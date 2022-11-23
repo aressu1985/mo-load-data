@@ -53,12 +53,12 @@ do
         echo -e "   -p  mo server password of the user[-u]"
         echo -e "   -c  designate the case config file that the load.sh will run, if None, will run all config in the dir ./cases/"
         echo -e "   -r  means tool will re-create table before loading"
-	echo -e "   -t  set times that test will run for" 
-	echo -e "Examples:"
+	      echo -e "   -t  set times that test will run for" 
+	      echo -e "Examples:"
         echo "   bash load.sh"
 	      echo -e "   bash run.sh -c cases/xxx.yml "
         echo -e "   bash run.sh -h 127.0.0.1 -udump -p111 -P6001 -c cases/xxx.yml"
-	echo "For more support,please email to sudong@matrixorigin.io"
+	      echo "For more support,please email to sudong@matrixorigin.io"
         exit 1
         ;;
         ?)
@@ -88,15 +88,16 @@ function load() {
     fi
     
     local sql="load data infile '${file}' into table ${db}.${table} FIELDS TERMINATED BY '${terminated}' LINES TERMINATED BY '\n';"
-    echo -e "[${name}]"
-    echo -e "Start to load data from file ${file} into table ${db}.${table},please wait....." | tee -a ${WORKSPACE}/run.log
-    echo "${sql}"
+    echo -e "`date +'%Y-%m-%d %H:%M:%S'` [${name}]"
+    echo -e "`date +'%Y-%m-%d %H:%M:%S'` Start to load data from file ${file} into table ${db}.${table},please wait....." | tee -a ${WORKSPACE}/run.log
+    echo -e "`date +'%Y-%m-%d %H:%M:%S'` ${sql}"
+    
     startTime=`date +%s.%N`
     result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} -e "${sql}" 2>&1`
     if [ $? -eq 0 ];then
       endTime=`date +%s.%N`
       getTiming $startTime $endTime
-      echo -e "The data for table ${db}.${table} has been loaded successfully, and cost: ${cost}" | tee -a ${WORKSPACE}/run.log
+      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The data for table ${db}.${table} has been loaded successfully, and cost: ${cost}" | tee -a ${WORKSPACE}/run.log
       echo "${name}:${cost}" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
       
       if [ "${CHECK}" = "true" ];then
@@ -114,16 +115,16 @@ function load() {
       echo -e "" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
     else
       STATUS=1
-      echo -e "The data for table ${db}.${table} has failed to be loaded." | tee -a ${WORKSPACE}/run.log
-      echo "${result}"
+      echo "`date +'%Y-%m-%d %H:%M:%S'` ${result}"
+      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The data for table ${db}.${table} has failed to be loaded." | tee -a ${WORKSPACE}/run.log
       echo "${name}: ${result}" | awk 'NR>1' | tee -a >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
       echo -e "" >> ${WORKSPACE}/report/cost.txt | tee -a ${WORKSPACE}/run.log
     fi
 
     if [ $STATUS -eq 1 ];then
-        echo "This test for [${name}] has been executed failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+        echo "`date +'%Y-%m-%d %H:%M:%S'` This test for [${name}] has been executed failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
     else
-	echo "This test for [${name}] has been executed successfully" | tee -a ${WORKSPACE}/run.log
+	echo "`date +'%Y-%m-%d %H:%M:%S'` This test for [${name}] has been executed successfully" | tee -a ${WORKSPACE}/run.log
     fi
 
     echo -e ""
@@ -155,7 +156,7 @@ function check() {
     local rcount=`echo "${result}" | awk 'NR>2'`
     if [ "${rcount}" != "${count}" ]; then
       STATUS=1
-      echo -e "The table[${db}.${table}] size is not correct, expect:${count}, but real[${rcount}]" | tee -a ${WORKSPACE}/run.log
+      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The table[${db}.${table}] size is not correct, expect:${count}, but real[${rcount}]" | tee -a ${WORKSPACE}/run.log
       return 1
     fi
     return 0
@@ -171,21 +172,21 @@ function createSchema() {
     local cdb="create database if not exists ${db};"
     local result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} -e "${cdb}" 2>&1`
     if [ $? -ne 0 ];then
-      echo -e "The database ${db} cant not be created. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
+      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The database ${db} cant not be created. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
       return 1
     fi
     
     if [ "${REPLACE}" = "true" ];then
       result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} -e "${drop}" 2>&1`
       if [ $? -ne 0 ];then
-	      echo -e "The table ${db}.${table} cant not be drop. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
+	      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The table ${db}.${table} cant not be drop. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
         return 1
       fi
     fi
 
     result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} -e "use ${db};${ddl}" 2>&1`
     if [ $? -ne 0 ];then
-      echo -e "The table ${db}.${table} cant not be created. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
+      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The table ${db}.${table} cant not be created. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
       return 1
     fi
     
@@ -225,7 +226,7 @@ if [ "${TIMES}" = "1" ];then
     done
                   
     if [ $STATUS -eq 1 ];then
-      echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+      echo "`date +'%Y-%m-%d %H:%M:%S'` This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
       exit 1
     fi  
     exit 0
@@ -233,17 +234,17 @@ if [ "${TIMES}" = "1" ];then
     createSchema ${dir}
     load ${dir}                  
     if [ $STATUS -eq 1 ];then
-      echo "This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+      echo "`date +'%Y-%m-%d %H:%M:%S'` This test has been failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
       exit 1
     fi  
     exit 0
   fi
 else
-  echo "This test will be run for ${TIMES} times"
+  echo "`date +'%Y-%m-%d %H:%M:%S'` This test will be run for ${TIMES} times"
   echo -e ""
     for i in $(seq 1 ${TIMES})
     do
-      echo "The ${i} turn has been stared, please wait......." | tee -a ${WORKSPACE}/run.log
+      echo "`date +'%Y-%m-%d %H:%M:%S'` The ${i} turn has been stared, please wait......." | tee -a ${WORKSPACE}/run.log
       unset CFGLIST
       if [ -d ${dir} ];then
         listCases ${dir}
@@ -253,7 +254,7 @@ else
           load $cfg
         done
       
-        echo "The ${i} turn test has ended, and test report is in ./report/${i} dir." | tee -a ${WORKSPACE}/run.log
+        echo "`date +'%Y-%m-%d %H:%M:%S'` The ${i} turn test has ended, and test report is in ./report/${i} dir." | tee -a ${WORKSPACE}/run.log
         echo -e ""
         
         mkdir -p ${WORKSPACE}/report/${i}/
@@ -265,9 +266,9 @@ else
     fi
     done
     if [ $STATUS -eq 1 ];then
-      echo "This test has been executed failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+      echo "`date +'%Y-%m-%d %H:%M:%S'` This test has been executed failed, more info, please see the log" | tee -a ${WORKSPACE}/run.log
       exit 1
     fi
-    echo "This test has been executed successfully, more info, please see the log" | tee -a ${WORKSPACE}/run.log
+    echo "`date +'%Y-%m-%d %H:%M:%S'` This test has been executed successfully, more info, please see the log" | tee -a ${WORKSPACE}/run.log
     exit 0
 fi
