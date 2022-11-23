@@ -40,6 +40,11 @@ do
         REPLACE="true"
 	      ;;
         t)
+        expr ${OPTARG} "+" 10 &> /dev/null
+        if [ $? -ne 0 ]; then
+          echo 'The times ['${OPTARG}'] is not a number'
+          exit 1
+        fi
         TIMES="${OPTARG}"
         ;;
         g)
@@ -153,11 +158,14 @@ function check() {
     local count=`cat ${cfg} | shyaml get-value count`
     local sql="select count(*) from ${db}.${table};"
     local result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} {db} -e "${sql}" 2>&1`
-    if [ $? -eq 1 ];then
+    local rcount=`echo "${result}" | awk 'NR>2'`
+    expr ${rcount} "+" 10 &> /dev/null
+    if [ $? -ne 0 ]; then
       echo -e "`date +'%Y-%m-%d %H:%M:%S'` Failed to query table[${db}.${table}] size, cause:" | tee -a ${WORKSPACE}/run.log
       echo -e "`date +'%Y-%m-%d %H:%M:%S'` ${result}" | tee -a ${WORKSPACE}/run.log
+      return 1
     fi
-    local rcount=`echo "${result}" | awk 'NR>2'`
+    
     if [ "${rcount}" != "${count}" ]; then
       STATUS=1
       echo -e "`date +'%Y-%m-%d %H:%M:%S'` The table[${db}.${table}] size is not correct, expect:${count}, but real[${rcount}]" | tee -a ${WORKSPACE}/run.log
