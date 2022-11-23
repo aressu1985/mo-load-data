@@ -168,7 +168,7 @@ function check() {
     
     if [ "${rcount}" != "${count}" ]; then
       STATUS=1
-      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The table[${db}.${table}] size is not correct, expect:${count}, but real[${rcount}]" | tee -a ${WORKSPACE}/run.log
+      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The table[${db}.${table}] size is not correct, expect:${count}, but real:${rcount}" | tee -a ${WORKSPACE}/run.log
       return 1
     fi
     return 0
@@ -191,7 +191,7 @@ function createSchema() {
     if [ "${REPLACE}" = "true" ];then
       result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} -e "${drop}" 2>&1`
       if [ $? -ne 0 ];then
-	      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The table ${db}.${table} cant not be drop. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
+	      echo -e "`date +'%Y-%m-%d %H:%M:%S'` The table ${db}.${table} cant not be dropped. Error: ${result}"  | tee -a ${WORKSPACE}/run.log
         return 1
       fi
     fi
