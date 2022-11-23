@@ -160,7 +160,7 @@ function check() {
     local result=`mysql -h${SERVER} -P${PORT} -u${USER} -p${PASS} {db} -e "${sql}" 2>&1`
     local rcount=`echo "${result}" | awk 'NR>2'`
     expr ${rcount} "+" 10 &> /dev/null
-    if [ $? -ne 1 ]; then
+    if [ $? -ne 0 ]; then
       echo -e "`date +'%Y-%m-%d %H:%M:%S'` Failed to query table[${db}.${table}] size, cause:" | tee -a ${WORKSPACE}/run.log
       echo -e "`date +'%Y-%m-%d %H:%M:%S'` ${result}" | tee -a ${WORKSPACE}/run.log
       return 1
