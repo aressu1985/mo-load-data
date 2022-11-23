@@ -73,6 +73,9 @@ do
 done
 
 function load() {
+    #reset STATUS
+    STATUS=0
+    
     local cfg=$1
     local db=`cat ${cfg} | shyaml get-value db`
     local table=`cat ${cfg} | shyaml get-value table`
